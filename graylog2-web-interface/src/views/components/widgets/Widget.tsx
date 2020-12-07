@@ -102,11 +102,13 @@ type State = {
   showMoveWidgetToTab: boolean,
 };
 
+/* eslint-disable camelcase */
 export type Result = {
   total: number,
   rows: Rows,
   effective_timerange: AbsoluteTimeRange,
 };
+/* eslint-enable camelcase */
 
 export type OnVisualizationConfigChange = (VisualizationConfig) => void;
 
