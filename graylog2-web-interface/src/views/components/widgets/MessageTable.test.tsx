@@ -22,6 +22,7 @@ import suppressConsole from 'helpers/suppressConsole';
 import FieldTypeMapping from 'views/logic/fieldtypes/FieldTypeMapping';
 import FieldType from 'views/logic/fieldtypes/FieldType';
 import MessagesWidgetConfig from 'views/logic/widgets/MessagesWidgetConfig';
+import WidgetFocusContext from 'views/components/contexts/WidgetFocusContext';
 
 import MessageTable from './MessageTable';
 
@@ -45,27 +46,33 @@ const config = MessagesWidgetConfig.builder().fields(['file_name']).build();
 const activeQueryId = 'some-query-id';
 
 describe('MessageTable', () => {
+  const SUT = (props) => (
+    <WidgetFocusContext.Provider value={{ focusedWidget: undefined, setFocusedWidget: () => {} }}>
+      <MessageTable {...props} />
+    </WidgetFocusContext.Provider>
+  );
+
   it('lists provided field in table head', () => {
-    const wrapper = mount(<MessageTable activeQueryId={activeQueryId}
-                                        config={config}
-                                        fields={Immutable.List(fields)}
-                                        messages={messages}
-                                        onSortChange={() => Promise.resolve()}
-                                        selectedFields={Immutable.Set()}
-                                        setLoadingState={() => {}} />);
+    const wrapper = mount(<SUT activeQueryId={activeQueryId}
+                               config={config}
+                               fields={Immutable.List(fields)}
+                               messages={messages}
+                               onSortChange={() => Promise.resolve()}
+                               selectedFields={Immutable.Set()}
+                               setLoadingState={() => {}} />);
     const th = wrapper.find('th').at(0);
 
     expect(th.text()).toContain('file_name');
   });
 
   it('renders a table entry for messages', () => {
-    const wrapper = mount(<MessageTable activeQueryId={activeQueryId}
-                                        config={config}
-                                        fields={Immutable.List(fields)}
-                                        onSortChange={() => Promise.resolve()}
-                                        selectedFields={Immutable.Set()}
-                                        setLoadingState={() => {}}
-                                        messages={messages} />);
+    const wrapper = mount(<SUT activeQueryId={activeQueryId}
+                               config={config}
+                               fields={Immutable.List(fields)}
+                               onSortChange={() => Promise.resolve()}
+                               selectedFields={Immutable.Set()}
+                               setLoadingState={() => {}}
+                               messages={messages} />);
     const messageTableEntry = wrapper.find('MessageTableEntry');
     const td = messageTableEntry.find('td').at(0);
 
@@ -75,13 +82,13 @@ describe('MessageTable', () => {
   it('renders a table entry for messages, even if fields are `undefined`', () => {
     // Suppressing console to disable props warning because of `fields` being `undefined`.
     suppressConsole(() => {
-      const wrapper = mount(<MessageTable activeQueryId={activeQueryId}
-                                          config={config}
-                                          fields={undefined}
-                                          onSortChange={() => Promise.resolve()}
-                                          selectedFields={Immutable.Set()}
-                                          setLoadingState={() => {}}
-                                          messages={messages} />);
+      const wrapper = mount(<SUT activeQueryId={activeQueryId}
+                                 config={config}
+                                 fields={undefined}
+                                 onSortChange={() => Promise.resolve()}
+                                 selectedFields={Immutable.Set()}
+                                 setLoadingState={() => {}}
+                                 messages={messages} />);
       const messageTableEntry = wrapper.find('MessageTableEntry');
 
       expect(messageTableEntry).not.toBeEmptyRender();
@@ -91,13 +98,13 @@ describe('MessageTable', () => {
   it('renders config fields in table head with correct order', () => {
     const configFields = ['gl2_receive_timestamp', 'user_id', 'gl2_source_input', 'gl2_message_id', 'ingest_time', 'http_method', 'action', 'source', 'ingest_time_hour', 'ingest_time_epoch'];
     const configWithFields = MessagesWidgetConfig.builder().fields(configFields).build();
-    const wrapper = mount(<MessageTable activeQueryId={activeQueryId}
-                                        config={configWithFields}
-                                        fields={Immutable.List(fields)}
-                                        onSortChange={() => Promise.resolve()}
-                                        selectedFields={Immutable.Set()}
-                                        setLoadingState={() => {}}
-                                        messages={messages} />);
+    const wrapper = mount(<SUT activeQueryId={activeQueryId}
+                               config={configWithFields}
+                               fields={Immutable.List(fields)}
+                               onSortChange={() => Promise.resolve()}
+                               selectedFields={Immutable.Set()}
+                               setLoadingState={() => {}}
+                               messages={messages} />);
 
     const tableHeadFields = wrapper.find('Field').map((field) => field.text());
 
@@ -109,13 +116,13 @@ describe('MessageTable', () => {
     const configWithFields = MessagesWidgetConfig.builder().fields(configFields).build();
     const wrapper = mount(
       <InteractiveContext.Provider value={false}>
-        <MessageTable activeQueryId={activeQueryId}
-                      config={configWithFields}
-                      fields={Immutable.List(fields)}
-                      onSortChange={() => Promise.resolve()}
-                      selectedFields={Immutable.Set()}
-                      setLoadingState={() => {}}
-                      messages={messages} />
+        <SUT activeQueryId={activeQueryId}
+             config={configWithFields}
+             fields={Immutable.List(fields)}
+             onSortChange={() => Promise.resolve()}
+             selectedFields={Immutable.Set()}
+             setLoadingState={() => {}}
+             messages={messages} />
       </InteractiveContext.Provider>,
     );
 
@@ -127,13 +134,13 @@ describe('MessageTable', () => {
   it('highlights messsage with id passed in `HighlightMessageContext`', () => {
     const wrapper = mount((
       <HighlightMessageContext.Provider value="message-id-1">
-        <MessageTable activeQueryId={activeQueryId}
-                      config={config}
-                      fields={Immutable.List(fields)}
-                      onSortChange={() => Promise.resolve()}
-                      selectedFields={Immutable.Set()}
-                      setLoadingState={() => {}}
-                      messages={messages} />
+        <SUT activeQueryId={activeQueryId}
+             config={config}
+             fields={Immutable.List(fields)}
+             onSortChange={() => Promise.resolve()}
+             selectedFields={Immutable.Set()}
+             setLoadingState={() => {}}
+             messages={messages} />
       </HighlightMessageContext.Provider>
     ));
 
@@ -145,13 +152,13 @@ describe('MessageTable', () => {
   it('does not highlight non-existing message id', () => {
     const wrapper = mount((
       <HighlightMessageContext.Provider value="message-id-42">
-        <MessageTable activeQueryId={activeQueryId}
-                      config={config}
-                      fields={Immutable.List(fields)}
-                      onSortChange={() => Promise.resolve()}
-                      selectedFields={Immutable.Set()}
-                      setLoadingState={() => {}}
-                      messages={messages} />
+        <SUT activeQueryId={activeQueryId}
+             config={config}
+             fields={Immutable.List(fields)}
+             onSortChange={() => Promise.resolve()}
+             selectedFields={Immutable.Set()}
+             setLoadingState={() => {}}
+             messages={messages} />
       </HighlightMessageContext.Provider>
     ));
 
